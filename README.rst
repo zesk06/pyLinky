@@ -15,7 +15,7 @@ pyLinky
     :target: https://requires.io/github/Pirionfr/pyLinky/requirements/?branch=master
     :alt: Requirements Status
 
-Get your consumption data from your Enedis account (www.enedis.fr) 
+Get your consumption data from your Enedis account (www.enedis.fr)
 
 This library This is based on jeedom_linky, created by Outadoc (https://github.com/Asdepique777/jeedom_linky)
 
@@ -37,10 +37,32 @@ Print your current data
 
     pylink -u <USERNAME> -p <PASSWORD>
 
+Alternatively, you can create a ``.dotenv`` file that contains
+your username and password:
+
+.. codeblock:: env
+
+    # .env file permit to define per folder env-var
+    PYLINKY_USERNAME="myUsername@somewhere.com"
+
+    PYLINKY_PASSWORD="WhatAWonderfullPassword"
+
+And launch pylink from the same folder.
+
+    # print hourly/daily/monthly/yearly consumption datas as json
+    pylink
+
+    # print only daily consumption as json
+    pylink --daily
+
+    # print only daily consumption as csv
+    pylink --daily --csv
+
+
 Dev env
 -------
 create virtual env and install requirements
 
     virtualenv -p /usr/bin/python3.5 env
-    pip install -r requirements.txt
+    pip install -e .[dev]
 
