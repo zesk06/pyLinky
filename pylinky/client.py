@@ -3,7 +3,7 @@ import base64
 import datetime
 from dateutil.relativedelta import relativedelta
 import requests
-
+from fake_useragent import UserAgent
 
 LOGIN_URL = "https://espace-client-connexion.enedis.fr/auth/UI/Login"
 HOST = "https://espace-client-particuliers.enedis.fr/group/espace-particuliers"
@@ -29,6 +29,8 @@ class LinkyClient(object):
         """Set http session."""
         if self._session is None:
             self._session = requests.Session()
+            # add a fake user agent to fool enedis
+            self._session.headers.update({"user-agent": str(UserAgent().random)})
             self._post_login_page()
 
     def _post_login_page(self):
@@ -42,10 +44,9 @@ class LinkyClient(object):
         }
 
         try:
-            self._session.post(
+            req = self._session.post(
                 LOGIN_URL, data=data, allow_redirects=False, timeout=self._timeout
             )
-
         except OSError:
             raise PyLinkyError("Can not submit login form")
 

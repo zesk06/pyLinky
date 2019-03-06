@@ -26,7 +26,7 @@ setup(
     packages=find_packages(),
     entry_points={"console_scripts": ["pylink = pylinky.__main__:main"]},
     license="Apache 2.0",
-    install_requires=["python-dateutil", "requests", "python-dotenv"],
+    install_requires=["python-dateutil", "requests", "fake_useragent", "python-dotenv"],
     extras_require={"dev": ["pylint", "doc8", "sphinx"]},
     classifiers=[
         "Programming Language :: Python :: 3.5",
