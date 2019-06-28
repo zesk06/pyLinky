@@ -2,6 +2,7 @@ import json
 import base64
 import datetime
 from dateutil.relativedelta import relativedelta
+import dateutil.parser as d_parser
 import requests
 from fake_useragent import UserAgent
 
@@ -159,6 +160,38 @@ class LinkyClient(object):
             )
 
         return result
+
+    def fetch_daily_since(self, since="01/01/2019"):
+        """Get the latest data from Enedis."""
+        # Get http session
+        self._get_httpsession()
+
+        today = datetime.date.today()
+        from_d = d_parser.parse(since, dayfirst=True).date()
+        to_d = from_d + relativedelta(days=30)
+        to_d = min(to_d, today)
+        if "daily" not in self._data:
+            self._data["daily"] = list()
+        while from_d < today:
+            # last 30 days
+            # print("fetching %s => %s" % (from_d, to_d))
+            new_d = self._get_data_per_day(
+                from_d.strftime("%d/%m/%Y"),
+                to_d.strftime("%d/%m/%Y"),
+            )
+            self._data["daily"].extend(new_d)
+            from_d = to_d
+            to_d = from_d + relativedelta(days=30)
+            to_d = min(to_d, today)
+        # clean up data
+        self.clean_datas()
+
+    def clean_datas(self):
+        # remove 0
+        self._data["daily"] = [item for item in self._data["daily"] if item["conso"] != 0]
+        # sort
+        self._data["daily"] = sorted(self._data["daily"], key= lambda item: d_parser.parse(item["time"], dayfirst=True))
+        
 
     def fetch_data(self):
         """Get the latest data from Enedis."""

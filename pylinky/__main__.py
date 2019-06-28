@@ -10,19 +10,20 @@ import os
 from dotenv import load_dotenv, find_dotenv
 from pylinky import LinkyClient
 
-
 def main():
     """Main function"""
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-u", "--username", help="enedis username")
     parser.add_argument("-p", "--password", help="Password")
+    parser.add_argument("--output-file", "-o", help="output file, or stdout")
     parser.add_argument(
         "-d", "--daily", help="Print daily consumption only", action="store_true"
     )
     parser.add_argument(
         "--csv", help="Print consumption using CSV format", action="store_true"
     )
+    parser.add_argument("--since", "-s", help="The since-date to fetch from")
     args = parser.parse_args()
 
     # parameter can be defined as environment variables
@@ -38,7 +39,10 @@ def main():
     client = LinkyClient(username, password)
 
     try:
-        client.fetch_data()
+        if args.since:
+            client.fetch_daily_since(since=args.since)
+        else:
+            client.fetch_data()
     except BaseException as exp:
         print(exp)
         return 1
@@ -48,16 +52,25 @@ def main():
     output_datas = {}
     if args.daily:
         output_datas["daily"] = datas["daily"]
+    else:
+        output_datas = datas
+    output_str = ""
     if args.csv:
-        print(";".join(("TYPE", "TIME", "CONSO")))
+        output_str = ",".join(("TIME", "CONSO"))
         for type_c, values in output_datas.items():
             for value in values:
                 time_c = value["time"]
                 cons_c = value["conso"]
-                print("{};{};{}".format(type_c, time_c, int(cons_c)))
+                line = ("{},{}".format(time_c, int(cons_c)))
+                output_str = output_str + "\n" + line 
     else:
-        print(json.dumps(output_datas, indent=2))
+        output_str = json.dumps(output_datas, indent=2)
 
+    if args.output_file:
+        with open(args.output_file, "w") as output_f:
+            output_f.write(output_str)
+    else:
+        print(output_str)
 
 if __name__ == "__main__":
     sys.exit(main())
